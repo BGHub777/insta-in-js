@@ -64,7 +64,7 @@ function App(props) {
       unsubscribe();
     }}, [])
 
-    const toggle = () => setOpenUpload(!openUpload);
+    // const toggle = () => setOpenUpload(!openUpload);
     
     useEffect(() => {
       db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
@@ -180,7 +180,7 @@ function App(props) {
         </div>
       </Modal>
 
-      <div className="app__header" style={{position:"sticky", top:"0"}}>
+      <div className="app__header" style={{}}>
         <img className="app__headerImage" src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" alt="insta-logo"/>
         
       { user ? (
@@ -196,11 +196,17 @@ function App(props) {
         }
       
       </div>
-    {
-      posts.map(({id, post}) => (
-        <Post key={id} username={post.username} caption={post.caption} imageURL={post.imageURL} photoURL={post.photoURL} />
-        ))
-    }
+      <div className="app__posts" style={{padding:"20px"}}>
+        {
+          posts.map(({id, post}) => (
+            <Post key={id} postId={id} user={user} username={post.username} caption={post.caption} imageURL={post.imageURL} photoURL={post.photoURL} />
+            ))
+        }
+      </div>  
+
+
+
+
           <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
             <h3>Upload Pictures of your Own</h3>
             <center>
