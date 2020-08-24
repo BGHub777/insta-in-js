@@ -6,6 +6,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Input, Button } from '@material-ui/core';
 import Modal from '@material-ui/core/Modal';
 import Uploader from './Uploader';
+import { Collapse, CardBody, Card } from 'reactstrap';
 
 function rand() {
   return Math.round(Math.random() * 20) - 10;
@@ -49,7 +50,8 @@ function App(props) {
   const [openSignIn, setOpenSignIn] = useState(false);
   const [photoURL, setPhotoURL] = useState('');
   
-  const [openUpload, setOpenUpload] = useState(false)
+  const [openUpload, setOpenUpload] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -64,7 +66,7 @@ function App(props) {
       unsubscribe();
     }}, [])
 
-    const toggle = () => setOpenUpload(!openUpload);
+    // const toggle = () => setOpenUpload(!openUpload);
     
     useEffect(() => {
       db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
@@ -98,6 +100,8 @@ function App(props) {
 
       setOpenSignIn(false);
     }
+
+    const toggle = () => setIsOpen(!isOpen);
     
     return (
       <div className="app">
@@ -115,10 +119,12 @@ function App(props) {
       >
         <div style={modalStyle} className={classes.paper}>
           <form className="app__form">
+            
+
             <center>
               <img src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" alt="insta-logo" style={{margin:"15px 0 15px 0"}}/>
             </center>
-
+          
               <Input 
               placeholder="Username..."
               type="text"
@@ -180,36 +186,59 @@ function App(props) {
         </div>
       </Modal>
 
-      <div className="app__header" style={{position:"sticky", top:"0"}}>
-        <img className="app__headerImage" src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" alt="insta-logo"/>
-        
-      { user ? (
-          <div>
-              <Button onClick={() => auth.signOut()}>Logout</Button>
+
+      <div className="app__header" style={{display:"flex", justifyContent:"space-between", alignContent:"center", alignItems:"center", justifyItems:"center"}}>
+        <img className="app__headerImage" src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png" alt="insta-logo" style={{maxHeight:"35px"}}/>
+            { user ? (
+                <div style={{display:"flex", justifyContent:"center", alignContent:"center", alignItems:"center", justifyItems:"center"}}>
+                  {user?.displayName ? (
+                    <div style={{display:"flex", flexDirection:"column", justifyContent:"center", alignContent:"center", alignItems:"center", justifyItems:"center"}}>
+                      <center>
+                        <div>
+                          <Button color="primary" onClick={toggle} style={{color:"black"}}>Upload</Button>
+
+                          <Modal
+                            open={isOpen}
+                            onClose={() => setIsOpen(false)}
+                          >
+                            <div style={modalStyle} className={classes.paper}>
+                                      <Uploader username={user.displayName} photoURL={user.photoURL}/>
+                            </div>
+                          </Modal>
+                        </div>
+                      </center>
+                    </div>
+                ) : ( 
+                  console.log("Not logged in")
+                )
+              }
+              <Button onClick={() => auth.signOut()} style={{}}>Logout</Button>
           </div>
         ) : (
+
           <div>
             <Button onClick={() => setOpen(true)}>Sign Up</Button>
             <Button onClick={() => setOpenSignIn(true)}>Login</Button>
           </div>
         )
         }
-      
       </div>
-    {
-      posts.map(({id, post}) => (
-        <Post key={id} username={post.username} caption={post.caption} imageURL={post.imageURL} photoURL={post.photoURL} />
-        ))
-    }
-          <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
-            <h3>Upload Pictures of your Own</h3>
-            <center>
-              {user?.displayName ? (
-                <Uploader username={user.displayName} photoURL={user.photoURL}/>
-              ):(
-                console.log("not logged in"))}
-            </center>
-          </div>
+
+
+      <div className="app__posts" style={{padding:"20px"}}>
+        {
+          posts.map(({id, post}) => (
+            <Post key={id} postId={id} user={user} username={post.username} caption={post.caption} imageURL={post.imageURL} photoURL={post.photoURL} />
+            ))
+        }
+      </div>  
+
+
+
+        
+
+
+
     </div>
   );
 }
